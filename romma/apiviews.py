@@ -32,10 +32,20 @@ class Bought(APIView):
     def put(self, request):
         created_by = request.user
         buy = Buy.objects.get(created_by=created_by)
-        buy.month_plan = True
+        month_plan = request.data.get("month_plan")
+        year_plan = request.data.get("year_plan")
+        if month_plan:
+            buy.month_plan = True
+            buy.end_at = datetime.now() + timedelta(days=30)
+        else:
+            buy.month_plan = False
+        if year_plan:
+            buy.year_plan = True
+            buy.end_at = datetime.now() + timedelta(days=365)
+        else:
+            buy.year_plan = False
         buy.started_at = datetime.now()
-        buy.end_at = datetime.now() + timedelta(days=30)
-        buy.save(update_fields=['month_plan', 'started_at', 'end_at'])
+        buy.save(update_fields=['month_plan', 'year_plan', 'started_at', 'end_at'])
         return Response({'updated'})
 
     def post(self, request):
@@ -47,7 +57,21 @@ class Bought(APIView):
         except Buy.DoesNotExist:
             serializer = BuySerializer(data=data)
             if serializer.is_valid():
+                month_plan = request.data.get("month_plan")
+                year_plan = request.data.get("year_plan")
                 buy = serializer.save()
+                if month_plan:
+                    buy.month_plan = True
+                    buy.end_at = datetime.now() + timedelta(days=30)
+                else:
+                    buy.month_plan = False
+                if year_plan:
+                    buy.year_plan = True
+                    buy.end_at = datetime.now() + timedelta(days=365)
+                else:
+                    buy.year_plan = False
+
+                serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -61,7 +85,8 @@ class Bought(APIView):
             buy.save()
 
         data = {
-            'created_by': created_by, 'started_at': buy.started_at, 'end_at': buy.end_at, 'month_plan': buy.month_plan
+            'created_by': created_by, 'started_at': buy.started_at, 'end_at': buy.end_at,
+            'month_plan': buy.month_plan, 'year_plan': buy.year_plan
         }
 
         return Response(data, status=status.HTTP_200_OK)

@@ -7,7 +7,8 @@ User._meta.get_field('email')._unique = True
 
 class Buy(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, unique=True)
-    month_plan = models.BooleanField(default=True)
+    month_plan = models.BooleanField(default=False)
+    year_plan = models.BooleanField(default=False)
     started_at = models.DateTimeField(default=datetime.now)
     end_at = models.DateTimeField(default=datetime.now() + timedelta(days=30))
 
