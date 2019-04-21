@@ -19,17 +19,17 @@ class UserCreate(generics.CreateAPIView):
 
 
 class ResetPassword(APIView):
-    permission_classes = (AllowAny, )
+    permission_classes = (AllowAny,)
 
     def post(self, request):
         email = request.data.get("email")
         user = User.objects.get(email=email)
         password = User.objects.make_random_password()
         user.set_password(password)
-
+        message = ' .تغییر یافت ' + password + ' رمز عبور شما به '
         send_mail(
-            'رمز عبور شما تغییر یافت به: ',
-            password,
+            'رُما، تغییر رمز عبور',
+            message,
             'rommaforgetpass@gmail.com',
             [email],
             fail_silently=False,
