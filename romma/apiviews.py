@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+
+from django.contrib.auth.models import User
 from rest_framework import generics, status
 from rest_framework.response import Response
 from romma.serializers import BuySerializer, UserSerializer
@@ -6,12 +8,37 @@ from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from .models import Buy
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+from rest_framework.permissions import AllowAny
 
 
 class UserCreate(generics.CreateAPIView):
     authentication_classes = ()
     permission_classes = ()
     serializer_class = UserSerializer
+
+
+class ResetPassword(APIView):
+    permission_classes = (AllowAny, )
+
+    def post(self, request):
+        email = request.data.get("email")
+        user = User.objects.get(email=email)
+        password = User.objects.make_random_password()
+        user.set_password(password)
+
+        send_mail(
+            'رمز عبور شما تغییر یافت به: ',
+            password,
+            'rommaforgetpass@gmail.com',
+            [email],
+            fail_silently=False,
+        )
+        if user:
+            user.save()
+            return Response({"password changed": password})
+        else:
+            return Response({"no user with this email"})
 
 
 class LoginView(APIView):
