@@ -23,21 +23,21 @@ class ResetPassword(APIView):
 
     def post(self, request):
         email = request.data.get("email")
-        user = User.objects.get(email=email)
-        password = User.objects.make_random_password()
-        user.set_password(password)
-        message = ' .تغییر یافت ' + password + ' رمز عبور شما به '
-        send_mail(
-            'رُما، تغییر رمز عبور',
-            message,
-            'rommaforgetpass@gmail.com',
-            [email],
-            fail_silently=False,
-        )
-        if user:
+        try:
+            user = User.objects.get(email=email)
+            password = User.objects.make_random_password()
+            user.set_password(password)
+            message = ' .تغییر یافت ' + password + ' رمز عبور شما به '
+            send_mail(
+                'رُما، تغییر رمز عبور',
+                message,
+                'rommaforgetpass@gmail.com',
+                [email],
+                fail_silently=False,
+            )
             user.save()
-            return Response({"password changed": password})
-        else:
+            return Response({"password changed"})
+        except User.DoesNotExist:
             return Response({"no user with this email"})
 
 
