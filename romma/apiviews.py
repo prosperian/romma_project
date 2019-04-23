@@ -45,9 +45,9 @@ class LoginView(APIView):
     permission_classes = ()
 
     def post(self, request, ):
-        username = request.data.get("username")
+        email = request.data.get("email")
         password = request.data.get("password")
-        user = authenticate(username=username, password=password)
+        user = authenticate(email=email, password=password)
         if user:
             return Response({"Token ": user.auth_token.key})
         else:
